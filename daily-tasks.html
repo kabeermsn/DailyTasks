@@ -970,16 +970,25 @@
         let driveFileId = null;
 
         // 1. Load Libraries
+        // 1. Load Libraries
         function gapiLoaded() {
-            gapiInited = true;
-            // Defer init until we have keys
-            if (API_KEY) {
-                intializeGapiClient();
-            }
+            gapi.load('client', () => {
+                gapiInited = true;
+                if (API_KEY) {
+                    intializeGapiClient();
+                }
+            });
         }
 
         async function intializeGapiClient() {
             if (!API_KEY) return;
+            // Ensure client is loaded (double check for direct calls)
+            if (!gapi.client) {
+                // Should not happen if flow is correct, but safe fallback
+                return new Promise(resolve => gapi.load('client', resolve))
+                    .then(intializeGapiClient);
+            }
+
             await gapi.client.init({
                 apiKey: API_KEY,
                 discoveryDocs: [DISCOVERY_DOC],
