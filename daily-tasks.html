@@ -1144,18 +1144,23 @@
                 });
 
                 const driveData = response.result;
-                // Merge or Replace strategy. For now: Replace Local with Drive (Cloud Truth)
-                // You might want to ask user confirmation in a real app if local has unsaved changes
 
-                if (driveData && driveData.tasks && driveData.tasks.length > 0) {
+                if (driveData && driveData.tasks) {
                     tasks = driveData.tasks;
                     projects = driveData.projects || projects;
-                    saveData(false); // Save to local storage, skip Drive sync to avoid loop
+
+                    // Save to LocalStorage manually to avoid triggering recursive sync
+                    localStorage.setItem(STORAGE_KEY_TASKS, JSON.stringify(tasks));
+                    localStorage.setItem(STORAGE_KEY_PROJECTS, JSON.stringify(projects));
+
+                    // Force re-render of the UI
+                    render();
                     console.log('Data loaded from Drive');
                 }
                 document.getElementById('syncStatus').textContent = 'Synced';
             } catch (e) {
                 console.error('Error loading from Drive', e);
+                document.getElementById('syncStatus').textContent = 'Sync Error';
             }
         }
 
