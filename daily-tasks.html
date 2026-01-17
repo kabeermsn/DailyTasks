@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Tasks | Focus & Achieve</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-color: #6366f1;
+            --accent-hover: #4f46e5;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            outline: none;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            flex: 1;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* File Input for Import */
+        #importFile {
+            display: none;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        /* Date Navigation */
+        .date-nav {
+            display: flex;
+            align-items: center;
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            padding: 0.5rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow);
+        }
+
+        .date-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+        }
+
+        .date-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        input[type="date"] {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 500;
+            font-size: 1rem;
+            padding: 0 0.5rem;
+            cursor: pointer;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+            opacity: 0.6;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.23);
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+        }
+
+        /* Stats */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Task List */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: var(--radius-md);
+            border: 1px dashed var(--glass-border);
+        }
+
+        .task-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .task-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--status-color, var(--text-secondary));
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .task-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .task-project-badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .task-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .task-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Select styling */
+        .status-select {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            appearance: none;
+            padding-right: 2rem;
+            position: relative;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.7rem center;
+        }
+
+        .status-select:hover {
+            border-color: var(--text-secondary);
+        }
+
+        .status-todo {
+            color: var(--text-secondary);
+            --status-color: var(--text-secondary);
+        }
+
+        .status-inprogress {
+            color: var(--warning);
+            --status-color: var(--warning);
+        }
+
+        .status-complete {
+            color: var(--success);
+            --status-color: var(--success);
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.4rem;
+            transition: color 0.2s;
+        }
+
+        .action-btn:hover {
+            color: var(--danger);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--radius-md);
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: scale(0.95);
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            padding: 0.75rem;
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            border-color: var(--accent-color);
+        }
+
+        .project-input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .task-card {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+    </style>
+    </style>
+    <!-- Google API Scripts -->
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Daily Tasks</h1>
+            <div class="date-nav">
+                <button class="date-btn" id="prevDayBtn"><i class="fas fa-chevron-left"></i></button>
+                <input type="date" id="datePicker">
+                <button class="date-btn" id="nextDayBtn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+
+            <div class="header-actions">
+                <button class="btn"
+                    style="background: var(--bg-card); border: 1px solid var(--glass-border); color: var(--text-secondary);"
+                    id="exportBtn" title="Export Data">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button class="btn"
+                    style="background: var(--bg-card); border: 1px solid var(--glass-border); color: var(--text-secondary);"
+                    id="importBtn" title="Import Data">
+                    <i class="fas fa-upload"></i>
+                </button>
+                <input type="file" id="importFile" accept=".json" style="display: none;">
+
+                <input type="file" id="importFile" accept=".json" style="display: none;">
+
+                <!-- Google Drive Actions -->
+                <button class="btn"
+                    style="background: var(--bg-card); border: 1px solid var(--glass-border); color: var(--text-secondary);"
+                    id="gDriveBtn" title="Connect Google Drive" onclick="handleAuthClick()">
+                    <i class="fab fa-google-drive"></i> Connect
+                </button>
+                <div id="syncStatus" style="font-size: 0.8rem; color: var(--text-secondary); display: none;"></div>
+
+                <button class="btn btn-primary" id="openModalBtn">
+                    <i class="fas fa-plus"></i> New Task
+                </button>
+            </div>
+        </header>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <span class="stat-value" id="statTotal">0</span>
+                <span class="stat-label">Total Tasks</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="statPending" style="color: var(--warning)">0</span>
+                <span class="stat-label">In Progress</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="statComplete" style="color: var(--success)">0</span>
+                <span class="stat-label">Completed</span>
+            </div>
+        </div>
+
+        <div id="taskList" class="task-list">
+            <!-- Tasks rendered here -->
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="taskModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Add New Task</h2>
+                <button class="close-modal" id="closeModalBtn">&times;</button>
+            </div>
+            <form id="taskForm">
+                <input type="hidden" id="taskId"> <!-- Hidden ID for editing -->
+                <div class="form-group">
+                    <label class="form-label" for="taskTitle">Task Title</label>
+                    <input type="text" class="form-input" id="taskTitle" required placeholder="What needs to be done?">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="taskDesc">Description (Optional)</label>
+                    <textarea class="form-textarea" id="taskDesc" rows="3" placeholder="Add details..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Project</label>
+                    <div class="project-input-group">
+                        <select class="form-select" id="projectSelect">
+                            <!-- Options generated by JS -->
+                        </select>
+                        <button type="button" class="btn btn-primary btn-icon" id="toggleAddProject"
+                            title="Add Project">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group" id="newProjectGroup" style="display: none;">
+                    <label class="form-label">New Project Name</label>
+                    <div class="project-input-group">
+                        <input type="text" class="form-input" id="newProjectName" placeholder="e.g. Work, Personal">
+                        <button type="button" class="btn btn-primary" id="saveProjectBtn">Save</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="taskDate">Task Date</label>
+                    <input type="date" class="form-input" id="taskDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="taskStatus">Initial Status</label>
+                    <select class="form-select" id="taskStatus">
+                        <option value="todo">To Do</option>
+                        <option value="inprogress">In Progress</option>
+                        <option value="complete">Completed</option>
+                    </select>
+                </div>
+
+                <div style="text-align: right; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary" id="submitTaskBtn">Create Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        /**
+         * Application State & Logic
+         */
+        const STORAGE_KEY_TASKS = 'daily_tasks_data';
+        const STORAGE_KEY_PROJECTS = 'daily_tasks_projects';
+
+        // State
+        let currentDate = new Date().toISOString().split('T')[0];
+        let tasks = [];
+        let projects = [];
+        let isEditing = false;
+
+        // DOM Elements
+        const datePicker = document.getElementById('datePicker');
+        const taskDateInput = document.getElementById('taskDate');
+        const taskListEl = document.getElementById('taskList');
+        const modal = document.getElementById('taskModal');
+        const taskForm = document.getElementById('taskForm');
+        const projectSelect = document.getElementById('projectSelect');
+
+        // Initial Load
+        function init() {
+            loadData();
+            cleanupOldTasks();
+
+            // Set Date Picker defaults
+            datePicker.value = currentDate;
+
+            // Event Listeners
+            document.getElementById('prevDayBtn').addEventListener('click', () => changeDate(-1));
+            document.getElementById('nextDayBtn').addEventListener('click', () => changeDate(1));
+            datePicker.addEventListener('change', (e) => {
+                currentDate = e.target.value;
+                render();
+            });
+
+            document.getElementById('openModalBtn').addEventListener('click', () => openModal());
+            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+
+            // Data Controls
+            document.getElementById('exportBtn').addEventListener('click', exportData);
+            document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+            document.getElementById('importFile').addEventListener('change', importData);
+
+            document.getElementById('toggleAddProject').addEventListener('click', () => {
+                const group = document.getElementById('newProjectGroup');
+                group.style.display = group.style.display === 'none' ? 'block' : 'none';
+            });
+
+            document.getElementById('saveProjectBtn').addEventListener('click', addNewProject);
+
+            taskForm.addEventListener('submit', handleTaskSubmit);
+
+            render();
+        }
+
+        function cleanupOldTasks() {
+            const date = new Date();
+            date.setDate(date.getDate() - 7);
+            const limitDate = date.toISOString().split('T')[0];
+
+            const initCount = tasks.length;
+            tasks = tasks.filter(t => {
+                // If task is complete AND date is strictly less than (older than) limitDate (1 week ago)
+                if (t.status === 'complete' && t.date < limitDate) {
+                    return false; // Remove
+                }
+                return true; // Keep
+            });
+
+            if (tasks.length < initCount) {
+                console.log(`Cleaned up ${initCount - tasks.length} old completed tasks.`);
+                saveData();
+            }
+        }
+
+        // Data Management
+        function loadData() {
+            const storedTasks = localStorage.getItem(STORAGE_KEY_TASKS);
+            const storedProjects = localStorage.getItem(STORAGE_KEY_PROJECTS);
+
+            tasks = storedTasks ? JSON.parse(storedTasks) : [];
+            projects = storedProjects ? JSON.parse(storedProjects) : [
+                { id: 'p1', name: 'General', color: '#6366f1' },
+                { id: 'p2', name: 'Work', color: '#3b82f6' },
+                { id: 'p3', name: 'Personal', color: '#10b981' }
+            ];
+        }
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY_TASKS, JSON.stringify(tasks));
+            localStorage.setItem(STORAGE_KEY_PROJECTS, JSON.stringify(projects));
+            render();
+        }
+
+        // Date Logic
+        function changeDate(days) {
+            const date = new Date(currentDate);
+            date.setDate(date.getDate() + days);
+            currentDate = date.toISOString().split('T')[0];
+            datePicker.value = currentDate;
+            render();
+        }
+
+        // Projects
+        function renderProjectOptions() {
+            projectSelect.innerHTML = projects.map(p =>
+                `<option value="${p.id}">${p.name}</option>`
+            ).join('');
+        }
+
+        function addNewProject() {
+            const input = document.getElementById('newProjectName');
+            const name = input.value.trim();
+            if (!name) return;
+
+            const newProject = {
+                id: 'p' + Date.now(),
+                name: name,
+                color: '#' + Math.floor(Math.random() * 16777215).toString(16) // Random color
+            };
+
+            projects.push(newProject);
+            saveData(); // Save projects to local storage
+            renderProjectOptions();
+            projectSelect.value = newProject.id;
+
+            input.value = '';
+            document.getElementById('newProjectGroup').style.display = 'none';
+        }
+
+        // Tasks
+        function handleTaskSubmit(e) {
+            e.preventDefault();
+
+            const taskId = document.getElementById('taskId').value;
+            const title = document.getElementById('taskTitle').value;
+            const desc = document.getElementById('taskDesc').value;
+            const projectId = document.getElementById('projectSelect').value;
+            const status = document.getElementById('taskStatus').value;
+            const selectedDate = document.getElementById('taskDate').value;
+
+            if (taskId) {
+                // Edit Mode
+                const taskIndex = tasks.findIndex(t => t.id === taskId);
+                if (taskIndex > -1) {
+                    tasks[taskIndex] = {
+                        ...tasks[taskIndex],
+                        title,
+                        description: desc,
+                        projectId,
+                        status,
+                        date: selectedDate,
+                        updatedAt: new Date().toISOString()
+                    };
+                }
+            } else {
+                // Create Mode
+                const newTask = {
+                    id: Date.now().toString(),
+                    title,
+                    description: desc,
+                    projectId,
+                    status,
+                    date: selectedDate,
+                    createdAt: new Date().toISOString()
+                };
+                tasks.push(newTask);
+            }
+
+            saveData();
+
+            closeModal();
+            taskForm.reset();
+
+            // Re-render
+            render();
+        }
+
+        function editTask(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            openModal(task);
+        }
+
+        function updateTaskStatus(taskId, newStatus) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                task.status = newStatus;
+                saveData();
+            }
+        }
+
+        function deleteTask(taskId) {
+            if (confirm('Are you sure you want to delete this task?')) {
+                tasks = tasks.filter(t => t.id !== taskId);
+                saveData();
+            }
+        }
+
+        // Rendering
+        function render() {
+            // Filter tasks for current date
+            const dayTasks = tasks.filter(t => t.date === currentDate);
+
+            // Update Stats
+            document.getElementById('statTotal').textContent = dayTasks.length;
+            document.getElementById('statPending').textContent = dayTasks.filter(t => t.status === 'inprogress').length;
+            document.getElementById('statComplete').textContent = dayTasks.filter(t => t.status === 'complete').length;
+
+            // Populate projects in modal (just in case)
+            if (projectSelect.children.length !== projects.length) {
+                renderProjectOptions();
+            }
+
+            // Render List
+            if (dayTasks.length === 0) {
+                taskListEl.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-calendar-check" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                    <h3>No tasks for this day</h3>
+                    <p>Click "New Task" to get started</p>
+                </div>
+            `;
+                return;
+            }
+
+            taskListEl.innerHTML = dayTasks.map(task => {
+                const project = projects.find(p => p.id === task.projectId) || projects[0];
+                const statusColor = task.status === 'complete' ? 'var(--success)' :
+                    task.status === 'inprogress' ? 'var(--warning)' : 'var(--text-secondary)';
+
+                return `
+            <div class="task-card" style="--status-color: ${statusColor}">
+                <div class="task-header">
+                    <div>
+                        <div class="task-title">${escapeHtml(task.title)}</div>
+                        <span class="task-project-badge" style="background: ${project.color}33; color: ${project.color}; border: 1px solid ${project.color}44">
+                            ${escapeHtml(project.name)}
+                        </span>
+                    </div>
+                    <div style="display:flex; gap: 0.5rem;">
+                        <button class="action-btn" onclick="editTask('${task.id}')" title="Edit">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button class="action-btn" onclick="deleteTask('${task.id}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                ${task.description ? `<div class="task-desc">${escapeHtml(task.description)}</div>` : ''}
+                <div class="task-footer">
+                    <select class="status-select status-${task.status}" onchange="updateTaskStatus('${task.id}', this.value)">
+                        <option value="todo" ${task.status === 'todo' ? 'selected' : ''}>To Do</option>
+                        <option value="inprogress" ${task.status === 'inprogress' ? 'selected' : ''}>In Progress</option>
+                        <option value="complete" ${task.status === 'complete' ? 'selected' : ''}>Completed</option>
+                    </select>
+                </div>
+            </div>
+            `;
+            }).join('');
+        }
+
+        // Utils
+        function openModal(taskToEdit = null) {
+            modal.classList.add('active');
+            renderProjectOptions();
+
+            const titleEl = document.getElementById('modalTitle');
+            const submitBtn = document.getElementById('submitTaskBtn');
+            const taskIdInput = document.getElementById('taskId');
+
+            if (taskToEdit) {
+                // Edit Mode
+                titleEl.textContent = 'Edit Task';
+                submitBtn.textContent = 'Save Changes';
+                taskIdInput.value = taskToEdit.id;
+
+                document.getElementById('taskTitle').value = taskToEdit.title;
+                document.getElementById('taskDesc').value = taskToEdit.description || '';
+                document.getElementById('projectSelect').value = taskToEdit.projectId;
+                document.getElementById('taskStatus').value = taskToEdit.status;
+                document.getElementById('taskDate').value = taskToEdit.date;
+            } else {
+                // Create Mode
+                titleEl.textContent = 'Add New Task';
+                submitBtn.textContent = 'Create Task';
+                taskIdInput.value = '';
+
+                taskForm.reset();
+                // Re-set default date because reset() might clear it
+                document.getElementById('taskDate').value = currentDate;
+                // Re-set default project just in case
+                if (projects.length > 0) document.getElementById('projectSelect').value = projects[0].id;
+            }
+        }
+
+        function exportData() {
+            const data = {
+                tasks: tasks,
+                projects: projects,
+                exportDate: new Date().toISOString()
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "daily_tasks_backup_" + new Date().toISOString().split('T')[0] + ".json");
+            document.body.appendChild(downloadAnchorNode); // required for firefox
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.tasks && data.projects) {
+                        if (confirm('This will overwrite all current tasks and projects. Are you sure?')) {
+                            tasks = data.tasks;
+                            projects = data.projects;
+                            saveData();
+                            location.reload(); // Reload to reflect all changes cleanly
+                        }
+                    } else {
+                        alert('Invalid file structure.');
+                    }
+                } catch (err) {
+                    alert('Error parsing JSON file.');
+                    console.error(err);
+                }
+            };
+            reader.readAsText(file);
+
+            // Reset input so same file can be selected again if needed
+            event.target.value = '';
+        }
+        function closeModal() {
+            modal.classList.remove('active');
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Initialize
+        init();
+
+        /* -------------------------------------------------------------------------- */
+        /*                          GOOGLE DRIVE INTEGRATION                          */
+        /* -------------------------------------------------------------------------- */
+
+        // TODO: REPLACE THESE WITH YOUR OWN CREDENTIALS FROM GOOGLE CLOUD CONSOLE
+        const CLIENT_ID = 'YOUR_CLIENT_ID_HERE';
+        const API_KEY = 'YOUR_API_KEY_HERE';
+
+        const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+        const DB_FILE_NAME = 'daily_tasks_db.json';
+
+        let tokenClient;
+        let gapiInited = false;
+        let gisInited = false;
+        let isDriveConnected = false;
+        let driveFileId = null;
+
+        // 1. Load Libraries
+        function gapiLoaded() {
+            gapi.load('client', intializeGapiClient);
+        }
+
+        async function intializeGapiClient() {
+            await gapi.client.init({
+                apiKey: API_KEY,
+                discoveryDocs: [DISCOVERY_DOC],
+            });
+            gapiInited = true;
+            checkAuthAvailable();
+        }
+
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: '', // defined later on request
+            });
+            gisInited = true;
+            checkAuthAvailable();
+        }
+
+        function checkAuthAvailable() {
+            if (gapiInited && gisInited) {
+                // If we had a stored token or session, we could try to silent login here
+                // For now, we wait for user to click "Connect"
+            }
+        }
+
+        // 2. Auth Actions
+        function handleAuthClick() {
+            if (isDriveConnected) {
+                // Sign Out logic (Revoke token)
+                const token = gapi.client.getToken();
+                if (token !== null) {
+                    google.accounts.oauth2.revoke(token.access_token, () => {
+                        gapi.client.setToken('');
+                        isDriveConnected = false;
+                        driveFileId = null;
+                        updateDriveUI();
+                        alert('Disconnected from Google Drive');
+                    });
+                }
+            } else {
+                // Sign In logic
+                tokenClient.callback = async (resp) => {
+                    if (resp.error !== undefined) {
+                        throw (resp);
+                    }
+                    isDriveConnected = true;
+                    updateDriveUI();
+                    await initializeDriveSync();
+                };
+
+                if (gapi.client.getToken() === null) {
+                    tokenClient.requestAccessToken({ prompt: 'consent' });
+                } else {
+                    tokenClient.requestAccessToken({ prompt: '' });
+                }
+            }
+        }
+
+        function updateDriveUI() {
+            const btn = document.getElementById('gDriveBtn');
+            const status = document.getElementById('syncStatus');
+
+            if (isDriveConnected) {
+                btn.innerHTML = '<i class="fab fa-google-drive"></i> Disconnect';
+                btn.style.borderColor = 'var(--success)';
+                btn.style.color = 'var(--success)';
+                status.style.display = 'block';
+                status.textContent = 'Syncing...';
+            } else {
+                btn.innerHTML = '<i class="fab fa-google-drive"></i> Connect';
+                btn.style.borderColor = 'var(--glass-border)';
+                btn.style.color = 'var(--text-secondary)';
+                status.style.display = 'none';
+            }
+        }
+
+        // 3. Drive Operations
+        async function initializeDriveSync() {
+            try {
+                // Check if file exists
+                const response = await gapi.client.drive.files.list({
+                    'pageSize': 10,
+                    'fields': 'files(id, name)',
+                    'q': `name = '${DB_FILE_NAME}' and trashed = false`
+                });
+
+                const files = response.result.files;
+                if (files && files.length > 0) {
+                    // File exists, download it
+                    driveFileId = files[0].id;
+                    console.log('Found Drive File:', driveFileId);
+                    await loadFromDrive();
+                } else {
+                    // File doesn't exist, create it with current local data
+                    console.log('Creating new Drive File...');
+                    await saveToDrive(true);
+                }
+
+                document.getElementById('syncStatus').textContent = 'Synced with Drive';
+
+            } catch (err) {
+                console.error('Drive Init Error', err);
+                document.getElementById('syncStatus').textContent = 'Sync Error';
+            }
+        }
+
+        async function loadFromDrive() {
+            if (!driveFileId) return;
+            document.getElementById('syncStatus').textContent = 'Downloading...';
+
+            try {
+                const response = await gapi.client.drive.files.get({
+                    fileId: driveFileId,
+                    alt: 'media'
+                });
+
+                const driveData = response.result;
+                // Merge or Replace strategy. For now: Replace Local with Drive (Cloud Truth)
+                // You might want to ask user confirmation in a real app if local has unsaved changes
+
+                if (driveData && driveData.tasks && driveData.tasks.length > 0) {
+                    tasks = driveData.tasks;
+                    projects = driveData.projects || projects;
+                    saveData(false); // Save to local storage, skip Drive sync to avoid loop
+                    console.log('Data loaded from Drive');
+                }
+                document.getElementById('syncStatus').textContent = 'Synced';
+            } catch (e) {
+                console.error('Error loading from Drive', e);
+            }
+        }
+
+        async function saveToDrive(isNew = false) {
+            if (!isDriveConnected) return;
+
+            document.getElementById('syncStatus').textContent = 'Saving...';
+
+            const content = JSON.stringify({
+                tasks: tasks,
+                projects: projects,
+                lastUpdated: new Date().toISOString()
+            });
+
+            const fileMetadata = {
+                'name': DB_FILE_NAME,
+                'mimeType': 'application/json'
+            };
+
+            try {
+                if (isNew) {
+                    // Create
+                    // Note: Creating file with content via gapi client is a bit complex (multipart).
+                    // This is a simplified "create empty file then update" or using multipart hack.
+                    // For simplicity in this snippet, we assume we might need a multipart upload helper
+                    // OR we use the simple upload path if supported.
+
+                    // Actually, gapi.client.drive.files.create supports resource, but not media body easily in JS client without multipart.
+                    // We'll trust the 'update' logic is easier, so let's try to create a placeholder then update it.
+
+                    const createParams = {
+                        resource: fileMetadata,
+                        fields: 'id'
+                    };
+                    const createRes = await gapi.client.drive.files.create(createParams);
+                    driveFileId = createRes.result.id;
+                }
+
+                if (driveFileId) {
+                    // Update content
+                    // To update media, we use the raw fetch or specific upload endpoint because gapi.client.drive.files.update 
+                    // is primarily for metadata unless using the /upload/ path.
+
+                    const accessToken = gapi.client.getToken().access_token;
+                    const url = `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`;
+
+                    await fetch(url, {
+                        method: 'PATCH',
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: content
+                    });
+
+                    document.getElementById('syncStatus').textContent = 'Saved to Drive';
+                    setTimeout(() => {
+                        document.getElementById('syncStatus').textContent = 'Synced';
+                    }, 2000);
+                }
+            } catch (e) {
+                console.error('Error saving to Drive', e);
+                document.getElementById('syncStatus').textContent = 'Save Failed';
+            }
+        }
+
+        // Wrap the original saveData to include Drive Sync
+        const originalSaveData = saveData;
+        saveData = function (syncToCloud = true) {
+            originalSaveData(); // Save to LocalStorage
+            if (syncToCloud && isDriveConnected) {
+                saveToDrive();
+            }
+        }
+
+    </script>
+</body>
+
+</html>
