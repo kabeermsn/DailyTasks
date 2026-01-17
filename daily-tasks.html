@@ -556,6 +556,37 @@
         </div>
     </div>
     </div>
+    </div>
+
+    <!-- Credentials Modal -->
+    <div class="modal-overlay" id="credentialsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Google Drive Settings</h2>
+                <button class="close-modal" id="closeCredentialsBtn">&times;</button>
+            </div>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">
+                To sync with Google Drive, you need to provide your own Google Cloud Credentials.
+                These will be saved in your browser's local storage.
+            </p>
+            <form id="credentialsForm">
+                <div class="form-group">
+                    <label class="form-label" for="inputClientId">Client ID</label>
+                    <input type="text" class="form-input" id="inputClientId"
+                        placeholder="e.g. 123...apps.googleusercontent.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="inputApiKey">API Key</label>
+                    <input type="text" class="form-input" id="inputApiKey" placeholder="e.g. AIza..." required>
+                </div>
+
+                <div style="text-align: right; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">Save & Connect</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
         /**
@@ -924,8 +955,9 @@
         /* -------------------------------------------------------------------------- */
 
         // TODO: REPLACE THESE WITH YOUR OWN CREDENTIALS FROM GOOGLE CLOUD CONSOLE
-        const CLIENT_ID = 'YOUR_CLIENT_ID_HERE';
-        const API_KEY = 'YOUR_API_KEY_HERE';
+        // TODO: Credentials Logic
+        let CLIENT_ID = localStorage.getItem('google_client_id') || '';
+        let API_KEY = localStorage.getItem('google_api_key') || '';
 
         const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
@@ -939,37 +971,52 @@
 
         // 1. Load Libraries
         function gapiLoaded() {
-            gapi.load('client', intializeGapiClient);
+            gapiInited = true;
+            // Defer init until we have keys
+            if (API_KEY) {
+                intializeGapiClient();
+            }
         }
 
         async function intializeGapiClient() {
+            if (!API_KEY) return;
             await gapi.client.init({
                 apiKey: API_KEY,
                 discoveryDocs: [DISCOVERY_DOC],
             });
-            gapiInited = true;
-            checkAuthAvailable();
         }
 
         function gisLoaded() {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID,
-                scope: SCOPES,
-                callback: '', // defined later on request
-            });
             gisInited = true;
-            checkAuthAvailable();
-        }
-
-        function checkAuthAvailable() {
-            if (gapiInited && gisInited) {
-                // If we had a stored token or session, we could try to silent login here
-                // For now, we wait for user to click "Connect"
+            // Defer init until we have keys
+            if (CLIENT_ID) {
+                initializeGisClient();
             }
         }
 
+        function initializeGisClient() {
+            if (!CLIENT_ID) return;
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: '', // defined in auth click
+            });
+        }
+
         // 2. Auth Actions
-        function handleAuthClick() {
+        async function handleAuthClick() {
+            // Check Credentials First
+            if (!CLIENT_ID || !API_KEY) {
+                openCredentialsModal();
+                return;
+            }
+
+            // Ensure init happened if keys were just added
+            if (!gapi.client.getToken() && !tokenClient) {
+                await intializeGapiClient();
+                initializeGisClient();
+            }
+
             if (isDriveConnected) {
                 // Sign Out logic (Revoke token)
                 const token = gapi.client.getToken();
@@ -984,6 +1031,8 @@
                 }
             } else {
                 // Sign In logic
+                if (!tokenClient) initializeGisClient(); // Just in case
+
                 tokenClient.callback = async (resp) => {
                     if (resp.error !== undefined) {
                         throw (resp);
@@ -1000,6 +1049,41 @@
                 }
             }
         }
+
+        // Credentials UI Logic
+        const credModal = document.getElementById('credentialsModal');
+        const credForm = document.getElementById('credentialsForm');
+        document.getElementById('closeCredentialsBtn').addEventListener('click', () => {
+            credModal.classList.remove('active');
+        });
+
+        function openCredentialsModal() {
+            document.getElementById('inputClientId').value = CLIENT_ID;
+            document.getElementById('inputApiKey').value = API_KEY;
+            credModal.classList.add('active');
+        }
+
+        credForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newClientId = document.getElementById('inputClientId').value.trim();
+            const newApiKey = document.getElementById('inputApiKey').value.trim();
+
+            if (newClientId && newApiKey) {
+                CLIENT_ID = newClientId;
+                API_KEY = newApiKey;
+                localStorage.setItem('google_client_id', CLIENT_ID);
+                localStorage.setItem('google_api_key', API_KEY);
+
+                credModal.classList.remove('active');
+
+                // Initialize libraries now that we have keys
+                intializeGapiClient();
+                initializeGisClient();
+
+                // Trigger Auth
+                setTimeout(handleAuthClick, 500);
+            }
+        });
 
         function updateDriveUI() {
             const btn = document.getElementById('gDriveBtn');
